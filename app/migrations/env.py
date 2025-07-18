@@ -7,6 +7,7 @@ from sqlmodel import SQLModel
 
 from alembic import context
 
+from app.config import settings
 from app.models import *
 
 # this is the Alembic Config object, which provides
@@ -34,13 +35,7 @@ target_metadata = SQLModel.metadata
 def get_url():
     """Generate a URL from the environment variables.
     """
-    return "postgresql://%s:%s@%s:%s/%s" % (
-        os.environ["DB_USER"],
-        os.environ["DB_PASSWORD"],
-        os.environ["DB_HOST"],
-        os.environ["DB_PORT"],
-        os.environ["DB_DATABASE"],
-    )
+    return str(settings.SQLALCHEMY_DATABASE_URI)
 
 
 def run_migrations_offline() -> None:
