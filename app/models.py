@@ -65,7 +65,7 @@ class PriceBase(SQLModel):
     added_by: str | None = Field(default=None)
 
 
-class Price(SQLModel, table=True):
+class Price(PriceBase, table=True):
     __tablename__ = "prices"
 
     id: int | None = Field(default=None, primary_key=True)

@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlmodel import Session, select
-from app.models import Category, CategoryBase, CategoryUpdate, Product, ProductBase, ProductUpdate, Store, StoreBase, StoreUpdate
+from app.models import Category, CategoryBase, CategoryUpdate, Price, PriceBase, PriceUpdate, Product, ProductBase, ProductUpdate, Store, StoreBase, StoreUpdate
 
 # Category CRUD
 
@@ -115,5 +115,47 @@ def delete_product(product_id: int, session: Session) -> bool:
     if not product_db:
         raise HTTPException(status_code=404, detail="Product not found")
     session.delete(product_db)
+    session.commit()
+    return True
+
+# Price CRUD
+
+
+def create_price(price: PriceBase, session: Session) -> Price:
+    if not read_product(price.product_id, session):
+        raise HTTPException(status_code=422, detail='Invalid product')
+    if not read_store(price.store_id, session):
+        raise HTTPException(status_code=422, detail='Invalid store')
+    price_db = Price.model_validate(price)
+    session.add(price_db)
+    session.commit()
+    session.refresh(price_db)
+    return price_db
+
+
+def read_price(price_id: int, session: Session) -> Price | None:
+    return session.get(Price, price_id)
+
+
+def read_prices(session: Session) -> list[Price]:
+    return session.exec(select(Price)).all()
+
+
+def update_price(price_id: int, price: PriceUpdate, session: Session) -> Price:
+    price_db = read_price(price_id, session)
+    if not price_db:
+        raise HTTPException(status_code=404, detail="Price not found")
+    price_db.sqlmodel_update(price.model_dump(exclude_unset=True))
+    session.add(price_db)
+    session.commit()
+    session.refresh(price_db)
+    return price_db
+
+
+def delete_price(price_id: int, session: Session) -> bool:
+    price_db = read_price(price_id, session)
+    if not price_db:
+        raise HTTPException(status_code=404, detail="Price not found")
+    session.delete(price_db)
     session.commit()
     return True

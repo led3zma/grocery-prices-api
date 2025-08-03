@@ -1,6 +1,6 @@
 from typing import Annotated
 from app.database import SessionDep
-from app.models import Category, CategoryBase, CategoryUpdate, Product, ProductBase, ProductUpdate, Store, StoreBase, StoreUpdate
+from app.models import Category, CategoryBase, CategoryUpdate, Price, PriceBase, PriceUpdate, Product, ProductBase, ProductUpdate, Store, StoreBase, StoreUpdate
 import app.crud as crud
 
 from fastapi import APIRouter, Body, Path
@@ -100,6 +100,39 @@ async def delete_product(product_id: Annotated[int, Path(gt=0)], session: Sessio
         return {'result': 'False'}
     return {'result': 'ok'}
 
+
+# Price Router
+
+price_router = APIRouter(prefix='/prices', tags=['price'])
+
+
+@price_router.get('/')
+async def read_prices(session: SessionDep) -> list[Price]:
+    return crud.read_prices(session)
+
+
+@price_router.get('/{price_id}')
+async def read_price(price_id: Annotated[int, Path(gt=0)], session: SessionDep) -> Price:
+    return crud.read_price(price_id, session)
+
+
+@price_router.post('/')
+async def create_price(price: Annotated[PriceBase, Body()], session: SessionDep) -> Price:
+    return crud.create_price(price, session)
+
+
+@price_router.put('/{price_id}')
+async def update_price(price_id: Annotated[int, Path(gt=0)], price: Annotated[PriceUpdate, Body()], session: SessionDep) -> Price:
+    return crud.update_price(price_id, price, session)
+
+
+@price_router.delete('/{price_id}')
+async def delete_price(price_id: Annotated[int, Path(gt=0)], session: SessionDep) -> dict:
+    if not crud.delete_price(price_id, session):
+        return {'result': 'False'}
+    return {'result': 'ok'}
+
 router.include_router(category_router)
 router.include_router(store_router)
 router.include_router(product_router)
+router.include_router(price_router)
