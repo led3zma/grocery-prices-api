@@ -1,6 +1,6 @@
 from typing import Annotated
 from app.database import SessionDep
-from app.models import Category, CategoryBase, CategoryUpdate, Store, StoreBase, StoreUpdate
+from app.models import Category, CategoryBase, CategoryUpdate, Product, ProductBase, ProductUpdate, Store, StoreBase, StoreUpdate
 import app.crud as crud
 
 from fastapi import APIRouter, Body, Path
@@ -69,5 +69,37 @@ async def delete_store(store_id: Annotated[int, Path(gt=0)], session: SessionDep
         return {'result': 'False'}
     return {'result': 'ok'}
 
+# Product Router
+
+product_router = APIRouter(prefix='/products', tags=['product'])
+
+
+@product_router.get('/')
+async def read_products(session: SessionDep) -> list[Product]:
+    return crud.read_products(session)
+
+
+@product_router.get('/{product_id}')
+async def read_product(product_id: Annotated[int, Path(gt=0)], session: SessionDep) -> Product:
+    return crud.read_product(product_id, session)
+
+
+@product_router.post('/')
+async def create_product(product: Annotated[ProductBase, Body()], session: SessionDep) -> Product:
+    return crud.create_product(product, session)
+
+
+@product_router.put('/{product_id}')
+async def update_product(product_id: Annotated[int, Path(gt=0)], product: Annotated[ProductUpdate, Body()], session: SessionDep) -> Product:
+    return crud.update_product(product_id, product, session)
+
+
+@product_router.delete('/{product_id}')
+async def delete_product(product_id: Annotated[int, Path(gt=0)], session: SessionDep) -> dict:
+    if not crud.delete_product(product_id, session):
+        return {'result': 'False'}
+    return {'result': 'ok'}
+
 router.include_router(category_router)
 router.include_router(store_router)
+router.include_router(product_router)

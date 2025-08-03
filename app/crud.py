@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlmodel import Session, select
-from app.models import Category, CategoryBase, CategoryUpdate, Store, StoreBase, StoreUpdate
+from app.models import Category, CategoryBase, CategoryUpdate, Product, ProductBase, ProductUpdate, Store, StoreBase, StoreUpdate
 
 # Category CRUD
 
@@ -75,5 +75,45 @@ def delete_store(store_id: int, session: Session) -> bool:
     if not store_db:
         raise HTTPException(status_code=404, detail="Store not found")
     session.delete(store_db)
+    session.commit()
+    return True
+
+
+# Product CRUD
+
+def create_product(product: ProductBase, session: Session) -> Product:
+    if not read_category(product.category_id, session):
+        raise HTTPException(status_code=422, detail='Invalid category')
+    product_db = Product.model_validate(product)
+    session.add(product_db)
+    session.commit()
+    session.refresh(product_db)
+    return product_db
+
+
+def read_product(product_id: int, session: Session) -> Product | None:
+    return session.get(Product, product_id)
+
+
+def read_products(session: Session) -> list[Product]:
+    return session.exec(select(Product)).all()
+
+
+def update_product(product_id: int, product: ProductUpdate, session: Session) -> Product:
+    product_db = read_product(product_id, session)
+    if not product_db:
+        raise HTTPException(status_code=404, detail="Product not found")
+    product_db.sqlmodel_update(product.model_dump(exclude_unset=True))
+    session.add(product_db)
+    session.commit()
+    session.refresh(product_db)
+    return product_db
+
+
+def delete_product(product_id: int, session: Session) -> bool:
+    product_db = read_product(product_id, session)
+    if not product_db:
+        raise HTTPException(status_code=404, detail="Product not found")
+    session.delete(product_db)
     session.commit()
     return True
