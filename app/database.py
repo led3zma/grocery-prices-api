@@ -4,7 +4,7 @@ from sqlmodel import Session, create_engine
 
 from app.config import settings
 
-engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
+engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
 
 def get_session():
