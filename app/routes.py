@@ -27,8 +27,8 @@ async def create_category(category: Annotated[CategoryBase, Body()], session: Se
     return crud.create_category(category, session)
 
 
-@category_router.patch('/{category_id}')
-async def update_category(category_id: Annotated[int, Path(gt=0)], category: Annotated[CategoryBase, Body()], session: SessionDep) -> Category:
+@category_router.put('/{category_id}')
+async def update_category(category_id: Annotated[int, Path(gt=0)], category: Annotated[CategoryUpdate, Body()], session: SessionDep) -> Category:
     return crud.update_category(category_id, category, session)
 
 
