@@ -9,7 +9,7 @@ router = APIRouter()
 
 # Category Router
 
-category_router = APIRouter(prefix='/categories')
+category_router = APIRouter(prefix='/categories', tags=['category'])
 
 
 @category_router.get('/')
